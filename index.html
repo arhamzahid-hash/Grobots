@@ -323,15 +323,18 @@ input[type=“time”]:focus { border-color: var(–primary); }
       <div class="form-group">
         <label>Store</label>
         <select id="new-store">
+          <option>Wegmans</option>
+          <option>Walmart</option>
+          <option>Aldi</option>
+          <option>Lidl</option>
+          <option>Target</option>
+          <option>Dollar General</option>
+          <option>Family Dollar</option>
           <option>Whole Foods</option>
           <option>Trader Joe's</option>
           <option>Safeway</option>
           <option>Kroger</option>
           <option>Costco</option>
-          <option>Walmart</option>
-          <option>Target</option>
-          <option>Aldi</option>
-          <option>Local Bakery</option>
           <option>Other</option>
         </select>
       </div>
@@ -385,9 +388,15 @@ const groceryDB = [
 ];
 
 const weeklyAds = [
-  { name: "Whole Foods Market", date: "Mar 1 – Mar 7", color: "#2d5a27", deals: ["Organic Apples 30% off", "Plant-based milk 2-for-1", "Wild salmon $12.99/lb", "Organic kale $1.99"] },
-  { name: "Trader Joe's", date: "Mar 1 – Mar 14", color: "#d4000f", deals: ["Oat milk back in stock!", "Cauliflower pizza $4.99", "Almond croissants $3.99", "Green tea BOGO"] },
-  { name: "Safeway", date: "Mar 3 – Mar 9", color: "#e85d26", deals: ["Eggs $3.99/dozen", "Chicken wings $2.99/lb", "Cereal 40% off", "Fresh OJ $4.49"] },
+  { name: "Wegmans", date: "Mar 1 – Mar 7", color: "#006341", logo: "https://logo.clearbit.com/wegmans.com", deals: ["Fresh salmon $8.99/lb", "Organic strawberries $3.99", "Wegmans pasta $1.49", "Rotisserie chicken $7.99"] },
+  { name: "Walmart", date: "Mar 1 – Mar 7", color: "#0071ce", logo: "https://logo.clearbit.com/walmart.com", deals: ["Great Value milk $2.98/gal", "Bananas 44¢/lb", "Ground beef $3.98/lb", "Bread $1.98"] },
+  { name: "Aldi", date: "Mar 1 – Mar 7", color: "#00539f", logo: "https://logo.clearbit.com/aldi.us", deals: ["Eggs $1.99/dozen", "Cheese $2.49", "Frozen veggies 89¢", "Yogurt 4-pack $2.79"] },
+  { name: "Lidl", date: "Mar 1 – Mar 7", color: "#0050aa", logo: "https://logo.clearbit.com/lidl.com", deals: ["Bakery bread $1.29", "Avocados 5 for $3", "Chicken thighs $1.49/lb", "OJ $2.99"] },
+  { name: "Target", date: "Mar 2 – Mar 8", color: "#cc0000", logo: "https://logo.clearbit.com/target.com", deals: ["Good & Gather milk $3.49", "Snack bars BOGO 50%", "Frozen meals $4.99", "Coffee 20% off"] },
+  { name: "Dollar General", date: "Mar 1 – Mar 7", color: "#ffc220", logo: "https://logo.clearbit.com/dollargeneral.com", deals: ["Canned goods 3/$5", "Cereal $2.75", "Paper towels $5.50", "Snacks buy 2 get 1"] },
+  { name: "Whole Foods", date: "Mar 1 – Mar 7", color: "#2d5a27", logo: "https://logo.clearbit.com/wholefoodsmarket.com", deals: ["Organic Apples 30% off", "Plant-based milk 2-for-1", "Wild salmon $12.99/lb", "Organic kale $1.99"] },
+  { name: "Trader Joe's", date: "Mar 1 – Mar 14", color: "#d4000f", logo: "https://logo.clearbit.com/traderjoes.com", deals: ["Oat milk back in stock!", "Cauliflower pizza $4.99", "Almond croissants $3.99", "Green tea BOGO"] },
+  { name: "Safeway", date: "Mar 3 – Mar 9", color: "#e85d26", logo: "https://logo.clearbit.com/safeway.com", deals: ["Eggs $3.99/dozen", "Chicken wings $2.99/lb", "Cereal 40% off", "Fresh OJ $4.49"] },
 ];
 
 // ─── RENDER ITEMS ─────────────────────────────────────────
@@ -453,9 +462,17 @@ function renderAds() {
     const matches = items.filter(i => ad.deals.some(d => d.toLowerCase().includes(i.name.toLowerCase().split(' ')[0]))).length;
     return `
       <div class="ad-card" onclick="viewAd('${ad.name}')">
-        <div class="ad-img-placeholder" style="background:linear-gradient(135deg,${ad.color}22,${ad.color}11);">
-          <div style="font-size:2rem;">🛒</div>
-          <div style="font-size:0.75rem;color:${ad.color};font-weight:700;font-family:'Syne',sans-serif;">${ad.name}</div>
+        <div class="ad-img-placeholder" style="background:linear-gradient(135deg,${ad.color}18,${ad.color}08);">
+          <img src="${ad.logo}" alt="${ad.name} logo"
+            style="max-width:130px;max-height:60px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div style="display:none;flex-direction:column;align-items:center;gap:4px;">
+            <div style="font-size:1.8rem;">🛒</div>
+            <div style="font-size:0.75rem;color:${ad.color};font-weight:700;font-family:'Syne',sans-serif;">${ad.name}</div>
+          </div>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px;width:100%;padding:0 12px;">
+            ${ad.deals.slice(0,2).map(d => `<div style="font-size:0.68rem;color:#444;background:rgba(255,255,255,0.8);border-radius:6px;padding:3px 8px;text-align:center;">🏷️ ${d}</div>`).join('')}
+          </div>
         </div>
         <div class="ad-info">
           <div class="ad-store">${ad.name}</div>
@@ -605,15 +622,22 @@ async function doAISummary() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      headers: { "Content-Type": "application/json", "x-api-key": "YOUR_API_KEY_HERE", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
+    if (!res.ok) {
+      const errMsg = data?.error?.message || `API error ${res.status}`;
+      textEl.textContent = `Error: ${errMsg}`;
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> AI Summary`;
+      return;
+    }
     const text = data.content?.[0]?.text || 'Could not generate summary. Please try again.';
     typeText(textEl, text);
     showToast('✉️ Summary ready! (Copy to share via iMessage)');
   } catch(e) {
-    textEl.textContent = 'Could not connect to AI. Please check your connection and try again.';
+    textEl.textContent = `Error: ${e.message}. Make sure your API key is set correctly.`;
   }
 
   btn.disabled = false;
