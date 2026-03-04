@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Grocery Scout</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f5f2ec;
+    --card: #ffffff;
+    --primary: #2d5a27;
+    --primary-light: #e8f0e7;
+    --accent: #e85d26;
+    --accent-light: #fdf0eb;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e0d8;
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #d97706;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.hero {
+background: linear-gradient(160deg, #2d5a27 0%, #1a3818 60%, #0f2510 100%);
+padding: 32px 20px 60px;
+position: relative;
+overflow: hidden;
+}
+.hero::before {
+content: ‘’;
+position: absolute; inset: 0;
+background: url(“data:image/svg+xml,%3Csvg width=‘60’ height=‘60’ viewBox=‘0 0 60 60’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cg fill=‘none’ fill-rule=‘evenodd’%3E%3Cg fill=’%23ffffff’ fill-opacity=‘0.03’%3E%3Ccircle cx=‘30’ cy=‘30’ r=‘4’/%3E%3C/g%3E%3C/g%3E%3C/svg%3E”);
+}
+.hero-top { display: flex; justify-content: space-between; align-items: flex-start; max-width: 700px; margin: 0 auto; position: relative; }
+.hero h1 { font-family: ‘Syne’, sans-serif; font-weight: 800; font-size: 2rem; color: #fff; letter-spacing: -0.03em; }
+.hero p { color: rgba(255,255,255,0.65); font-size: 0.875rem; margin-top: 4px; font-weight: 300; }
+.hero-badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 20px; padding: 6px 14px; font-size: 0.75rem; font-weight: 500; backdrop-filter: blur(8px); white-space: nowrap; }
+
+/* SEARCH */
+.search-bar {
+max-width: 700px; margin: -22px auto 0; padding: 0 16px; position: relative; z-index: 10;
+}
+.search-wrap { display: flex; background: #fff; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); overflow: hidden; border: 1px solid var(–border); }
+.search-wrap input { flex: 1; border: none; outline: none; padding: 14px 16px; font-family: ‘DM Sans’, sans-serif; font-size: 0.9rem; background: transparent; }
+.search-wrap button { background: var(–primary); color: white; border: none; padding: 0 20px; cursor: pointer; font-family: ‘Syne’, sans-serif; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.05em; transition: background 0.2s; }
+.search-wrap button:hover { background: #234a1e; }
+#search-results { background: #fff; border-radius: 0 0 14px 14px; border: 1px solid var(–border); border-top: none; display: none; max-height: 280px; overflow-y: auto; }
+.search-result-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(–border); display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; }
+.search-result-item:hover { background: var(–primary-light); }
+.search-result-item:last-child { border-bottom: none; }
+.result-name { font-weight: 500; font-size: 0.9rem; }
+.result-meta { font-size: 0.78rem; color: var(–muted); }
+.result-price { font-weight: 600; color: var(–primary); font-size: 0.9rem; }
+.result-store { font-size: 0.75rem; color: var(–muted); }
+
+/* MAIN */
+main { max-width: 700px; margin: 0 auto; padding: 24px 16px 80px; }
+
+/* TABS */
+.tabs { display: flex; background: #fff; border-radius: 12px; padding: 4px; margin-bottom: 20px; border: 1px solid var(–border); box-shadow: var(–shadow); }
+.tab-btn { flex: 1; padding: 10px; border: none; background: transparent; cursor: pointer; border-radius: 9px; font-family: ‘Syne’, sans-serif; font-weight: 600; font-size: 0.82rem; color: var(–muted); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.tab-btn.active { background: var(–primary); color: white; }
+.tab-btn svg { width: 15px; height: 15px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* SECTION HEADER */
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-title { font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 1.1rem; }
+
+/* CARDS */
+.card { background: var(–card); border-radius: var(–radius); border: 1px solid var(–border); box-shadow: var(–shadow); overflow: hidden; }
+.item-card { margin-bottom: 12px; transition: box-shadow 0.2s, transform 0.2s; }
+.item-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); transform: translateY(-1px); }
+.item-body { padding: 16px; }
+.item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.item-store { font-size: 0.73rem; color: var(–muted); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.item-name { font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+.item-price { font-size: 0.95rem; font-weight: 500; color: var(–primary); }
+.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+.badge-green { background: #dcfce7; color: #166534; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.item-footer { padding: 12px 16px; border-top: 1px solid var(–border); background: #fafafa; display: flex; justify-content: space-between; align-items: center; }
+.toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.toggle { position: relative; width: 40px; height: 22px; cursor: pointer; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 20px; transition: background 0.2s; }
+.toggle-slider::before { content: ‘’; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toggle input:checked + .toggle-slider { background: #3b82f6; }
+.toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+.notify-label { font-size: 0.8rem; font-weight: 500; }
+.notify-on { color: #3b82f6; }
+.notify-off { color: var(–muted); }
+.delete-btn { background: none; border: none; cursor: pointer; color: var(–muted); padding: 4px; border-radius: 6px; transition: all 0.15s; }
+.delete-btn:hover { color: var(–red); background: #fee2e2; }
+
+/* ADD ITEM */
+.add-btn { width: 100%; padding: 14px; background: #fff; border: 2px dashed var(–border); border-radius: var(–radius); color: var(–muted); font-family: ‘Syne’, sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; margin-top: 4px; }
+.add-btn:hover { border-color: var(–primary); color: var(–primary); background: var(–primary-light); }
+
+/* ADD ITEM MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 24px 24px 0 0; padding: 28px 20px 40px; width: 100%; max-width: 500px; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal h3 { font-family: ‘Syne’, sans-serif; font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(–muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid var(–border); border-radius: 10px; font-family: ‘DM Sans’, sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; background: #fafafa; }
+.form-group input:focus, .form-group select:focus { border-color: var(–primary); background: #fff; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-primary { width: 100%; padding: 14px; background: var(–primary); color: white; border: none; border-radius: 12px; font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+.btn-primary:hover { background: #234a1e; }
+.btn-cancel { width: 100%; padding: 12px; background: transparent; color: var(–muted); border: 1px solid var(–border); border-radius: 12px; font-family: ‘Syne’, sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; margin-top: 8px; }
+
+/* WEEKLY ADS */
+.ads-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none; }
+.ads-scroll::-webkit-scrollbar { display: none; }
+.ad-card { min-width: 220px; background: var(–card); border-radius: var(–radius); border: 1px solid var(–border); overflow: hidden; flex-shrink: 0; cursor: pointer; transition: all 0.2s; box-shadow: var(–shadow); }
+.ad-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+.ad-img { width: 100%; height: 160px; object-fit: cover; display: block; background: var(–primary-light); display: flex; align-items: center; justify-content: center; }
+.ad-img-placeholder { width: 100%; height: 160px; background: linear-gradient(135deg, var(–primary-light), #d4e8d3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.ad-info { padding: 12px 14px; }
+.ad-store { font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.9rem; }
+.ad-date { font-size: 0.75rem; color: var(–muted); margin-top: 2px; }
+.ad-matches { display: inline-block; margin-top: 8px; background: var(–accent-light); color: var(–accent); font-size: 0.72rem; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+
+/* AI SUMMARY BUTTON */
+.ai-btn { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: var(–accent); color: white; border: none; border-radius: 10px; font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+.ai-btn:hover { background: #c94d1b; }
+.ai-btn:disabled { opacity: 0.7; cursor: default; }
+.ai-btn svg { width: 14px; height: 14px; }
+
+/* AI RESULT PANEL */
+.ai-panel { background: var(–card); border-radius: var(–radius); border: 1px solid var(–border); padding: 20px; margin-top: 16px; box-shadow: var(–shadow); display: none; }
+.ai-panel.visible { display: block; animation: fadeUp 0.4s ease; }
+.ai-panel-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.ai-panel-title { font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.9rem; }
+.ai-orb { width: 28px; height: 28px; background: linear-gradient(135deg, var(–accent), #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-text { font-size: 0.875rem; line-height: 1.7; color: var(–text); white-space: pre-wrap; }
+.typing-cursor { display: inline-block; width: 2px; height: 1em; background: var(–accent); vertical-align: text-bottom; animation: blink 0.8s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* DEAL ALERT */
+.deal-card { display: flex; align-items: flex-start; gap: 14px; padding: 16px; }
+.deal-icon { width: 40px; height: 40px; background: var(–accent-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(–accent); }
+.deal-title { font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.9rem; }
+.deal-desc { font-size: 0.82rem; color: var(–muted); margin-top: 2px; }
+.deal-btn { margin-left: auto; background: var(–primary); color: white; border: none; border-radius: 8px; padding: 8px 14px; font-family: ‘Syne’, sans-serif; font-weight: 600; font-size: 0.78rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s; }
+.deal-btn:hover { background: #234a1e; }
+
+/* SETTINGS CARD */
+.settings-card { padding: 16px 20px; margin-top: 14px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.settings-info { display: flex; align-items: center; gap: 12px; }
+.settings-icon { width: 36px; height: 36px; background: var(–primary-light); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(–primary); flex-shrink: 0; }
+.settings-title { font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 0.88rem; }
+.settings-desc { font-size: 0.78rem; color: var(–muted); }
+.settings-controls { display: flex; align-items: center; gap: 12px; }
+input[type=“time”] { border: 1px solid var(–border); border-radius: 8px; padding: 6px 10px; font-family: ‘DM Sans’, sans-serif; font-size: 0.82rem; outline: none; background: #fafafa; }
+input[type=“time”]:focus { border-color: var(–primary); }
+
+/* TOAST */
+.toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.toast { background: #1a1a1a; color: white; border-radius: 12px; padding: 12px 20px; font-size: 0.85rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 320px; text-align: center; animation: toastIn 0.3s ease; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.toast.fade-out { animation: toastOut 0.3s ease forwards; }
+@keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
+
+/* SPINNER */
+.spin { animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 40px 20px; color: var(–muted); }
+.empty svg { opacity: 0.3; margin-bottom: 12px; }
+.empty p { font-size: 0.875rem; }
+
+/* ALERT BANNER */
+.alert-banner { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 0.83rem; }
+.alert-banner strong { font-weight: 600; }
+</style>
+
+</head>
+<body>
+
+<!-- HERO -->
+
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <h1>🛒 Grocery Scout</h1>
+      <p id="hero-subtitle">Track items across stores · Get deal alerts</p>
+    </div>
+    <div class="hero-badge" id="hero-badge">● 0 tracking</div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+
+<div class="search-bar">
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="Search for groceries to track..." autocomplete="off"/>
+    <button onclick="doSearch()">Search</button>
+  </div>
+  <div id="search-results"></div>
+</div>
+
+<!-- MAIN -->
+
+<main>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('inventory', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Inventory Tracker
+    </button>
+    <button class="tab-btn" onclick="switchTab('weekly-ads', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Weekly Ads
+    </button>
+  </div>
+
+  <!-- INVENTORY TAB -->
+
+  <div class="tab-content active" id="tab-inventory">
+    <div class="section-header">
+      <span class="section-title">Tracked Items</span>
+      <div style="display:flex;align-items:center;gap:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:5px 12px;font-size:0.75rem;color:#1d4ed8;font-weight:500;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        iMessage Alerts Active
+      </div>
+    </div>
+
+```
+<div id="alert-banner" class="alert-banner" style="display:none;">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <span id="alert-banner-text"></span>
+</div>
+
+<div id="items-list"></div>
+
+<button class="add-btn" onclick="openModal()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  Add item to track
+</button>
+```
+
+  </div>
+
+  <!-- WEEKLY ADS TAB -->
+
+  <div class="tab-content" id="tab-weekly-ads">
+    <div class="section-header">
+      <span class="section-title">Latest Circulars</span>
+      <button class="ai-btn" id="ai-btn" onclick="doAISummary()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        AI Summary
+      </button>
+    </div>
+
+```
+<div class="ads-scroll" id="ads-scroll"></div>
+
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-orb">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+    </div>
+    <span class="ai-panel-title">AI Weekly Summary</span>
+  </div>
+  <div class="ai-text" id="ai-text"></div>
+</div>
+
+<!-- DEALS -->
+<div id="deals-section" style="margin-top:16px;"></div>
+
+<!-- DAILY SUMMARY SETTINGS -->
+<div class="card settings-card" style="margin-top:14px;">
+  <div class="settings-row">
+    <div class="settings-info">
+      <div class="settings-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div>
+        <div class="settings-title">Daily iMessage Summary</div>
+        <div class="settings-desc">Top deals sent to your phone every morning</div>
+      </div>
+    </div>
+    <div class="settings-controls">
+      <input type="time" id="summary-time" value="08:00" onchange="onTimeChange(this.value)"/>
+      <label class="toggle">
+        <input type="checkbox" id="daily-toggle" checked onchange="onDailyToggle(this.checked)"/>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</main>
+
+<!-- ADD ITEM MODAL -->
+
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h3>Track New Item</h3>
+    <div class="form-group">
+      <label>Item Name</label>
+      <input type="text" id="new-name" placeholder="e.g. Organic Oat Milk" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Store</label>
+        <select id="new-store">
+          <option>Whole Foods</option>
+          <option>Trader Joe's</option>
+          <option>Safeway</option>
+          <option>Kroger</option>
+          <option>Costco</option>
+          <option>Walmart</option>
+          <option>Target</option>
+          <option>Aldi</option>
+          <option>Local Bakery</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input type="text" id="new-price" placeholder="e.g. $4.99" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="new-status">
+        <option>In Stock</option>
+        <option>Low Stock</option>
+        <option>Out of Stock</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="addItem()">Add to Tracker</button>
+    <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let items = [
+  { id: 1, name: "Organic Honeycrisp Apples", store: "Whole Foods", status: "In Stock", price: "$2.99/lb", notify: true },
+  { id: 2, name: "Oat Milk (Barista Blend)", store: "Trader Joe's", status: "Out of Stock", price: "$4.49", notify: true },
+  { id: 3, name: "Sourdough Bread", store: "Local Bakery", status: "Low Stock", price: "$6.50", notify: false },
+  { id: 4, name: "Free Range Eggs", store: "Safeway", status: "In Stock", price: "$5.99", notify: false },
+];
+
+const groceryDB = [
+  { name: "Organic Whole Milk", store: "Whole Foods", price: "$5.49", status: "In Stock" },
+  { name: "Greek Yogurt", store: "Trader Joe's", price: "$3.99", status: "In Stock" },
+  { name: "Avocados (3 pack)", store: "Costco", price: "$6.99", status: "Low Stock" },
+  { name: "Almond Butter", store: "Whole Foods", price: "$8.99", status: "In Stock" },
+  { name: "Sourdough Bread", store: "Local Bakery", price: "$6.50", status: "Low Stock" },
+  { name: "Sparkling Water (12pk)", store: "Safeway", price: "$4.99", status: "In Stock" },
+  { name: "Cage-Free Eggs", store: "Trader Joe's", price: "$4.29", status: "In Stock" },
+  { name: "Organic Spinach", store: "Whole Foods", price: "$3.99", status: "Out of Stock" },
+  { name: "Chicken Breast (2lb)", store: "Kroger", price: "$7.49", status: "In Stock" },
+  { name: "Pasta (Penne)", store: "Aldi", price: "$1.29", status: "In Stock" },
+  { name: "Olive Oil (32oz)", store: "Costco", price: "$12.99", status: "In Stock" },
+  { name: "Cheddar Cheese", store: "Safeway", price: "$5.99", status: "In Stock" },
+  { name: "Brown Rice", store: "Trader Joe's", price: "$2.99", status: "Low Stock" },
+  { name: "Frozen Blueberries", store: "Walmart", price: "$4.49", status: "In Stock" },
+  { name: "Coconut Oil", store: "Whole Foods", price: "$9.99", status: "Out of Stock" },
+];
+
+const weeklyAds = [
+  { name: "Whole Foods Market", date: "Mar 1 – Mar 7", color: "#2d5a27", deals: ["Organic Apples 30% off", "Plant-based milk 2-for-1", "Wild salmon $12.99/lb", "Organic kale $1.99"] },
+  { name: "Trader Joe's", date: "Mar 1 – Mar 14", color: "#d4000f", deals: ["Oat milk back in stock!", "Cauliflower pizza $4.99", "Almond croissants $3.99", "Green tea BOGO"] },
+  { name: "Safeway", date: "Mar 3 – Mar 9", color: "#e85d26", deals: ["Eggs $3.99/dozen", "Chicken wings $2.99/lb", "Cereal 40% off", "Fresh OJ $4.49"] },
+];
+
+// ─── RENDER ITEMS ─────────────────────────────────────────
+function renderItems() {
+  const list = document.getElementById('items-list');
+  const badge = document.getElementById('hero-badge');
+  const subtitle = document.getElementById('hero-subtitle');
+
+  badge.textContent = `● ${items.length} tracking`;
+
+  const outOfStock = items.filter(i => i.status === 'Out of Stock');
+  const alertBanner = document.getElementById('alert-banner');
+  const alertText = document.getElementById('alert-banner-text');
+  if (outOfStock.length > 0) {
+    alertBanner.style.display = 'flex';
+    alertText.innerHTML = `<strong>${outOfStock.length} item${outOfStock.length > 1 ? 's' : ''} out of stock</strong> — alerts will fire when restocked`;
+  } else {
+    alertBanner.style.display = 'none';
+  }
+
+  if (items.length === 0) {
+    list.innerHTML = `<div class="empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg><p>No items tracked yet.<br/>Add your first item above.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(item => `
+    <div class="card item-card">
+      <div class="item-body">
+        <div class="item-top">
+          <div>
+            <div class="item-store">📍 ${item.store}</div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">${item.price}</div>
+          </div>
+          <span class="badge ${item.status === 'In Stock' ? 'badge-green' : item.status === 'Out of Stock' ? 'badge-red' : 'badge-amber'}">${item.status}</span>
+        </div>
+      </div>
+      <div class="item-footer">
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" ${item.notify ? 'checked' : ''} onchange="toggleNotify(${item.id}, this.checked)"/>
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="notify-label ${item.notify ? 'notify-on' : 'notify-off'}">
+            ${item.notify ? '🔔 Alert On' : '🔕 Alert Off'}
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${item.status === 'Out of Stock' && item.notify ? '<span style="font-size:0.75rem;color:#6b7280;animation:pulse 2s infinite">⏳ Waiting for restock…</span>' : ''}
+          <button class="delete-btn" onclick="deleteItem(${item.id})" title="Remove">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── RENDER ADS ──────────────────────────────────────────
+function renderAds() {
+  const scroll = document.getElementById('ads-scroll');
+  scroll.innerHTML = weeklyAds.map(ad => {
+    const matches = items.filter(i => ad.deals.some(d => d.toLowerCase().includes(i.name.toLowerCase().split(' ')[0]))).length;
+    return `
+      <div class="ad-card" onclick="viewAd('${ad.name}')">
+        <div class="ad-img-placeholder" style="background:linear-gradient(135deg,${ad.color}22,${ad.color}11);">
+          <div style="font-size:2rem;">🛒</div>
+          <div style="font-size:0.75rem;color:${ad.color};font-weight:700;font-family:'Syne',sans-serif;">${ad.name}</div>
+        </div>
+        <div class="ad-info">
+          <div class="ad-store">${ad.name}</div>
+          <div class="ad-date">${ad.date}</div>
+          ${matches > 0 ? `<span class="ad-matches">⚡ ${matches} item match${matches > 1 ? 'es' : ''}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  renderDeals();
+}
+
+function renderDeals() {
+  const section = document.getElementById('deals-section');
+  const deals = [];
+  weeklyAds.forEach(ad => {
+    ad.deals.forEach(deal => {
+      const match = items.find(i => deal.toLowerCase().includes(i.name.toLowerCase().split(' ')[0]));
+      if (match) deals.push({ deal, store: ad.name, item: match });
+    });
+  });
+
+  if (deals.length === 0) {
+    section.innerHTML = `<div class="card deal-card" style="color:var(--muted);font-size:0.85rem;">No current deals match your tracked items. Add more items to get matches!</div>`;
+    return;
+  }
+
+  section.innerHTML = deals.slice(0, 3).map(d => `
+    <div class="card" style="margin-bottom:10px;">
+      <div class="deal-card">
+        <div class="deal-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <div>
+          <div class="deal-title">Deal Match!</div>
+          <div class="deal-desc">${d.deal} · ${d.store}</div>
+        </div>
+        <button class="deal-btn" onclick="toast('Viewing deal for ${d.item.name}')">View</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────
+function toggleNotify(id, val) {
+  items = items.map(i => i.id === id ? { ...i, notify: val } : i);
+  renderItems();
+  showToast(val ? '🔔 Alert turned on' : '🔕 Alert turned off');
+}
+
+function deleteItem(id) {
+  const item = items.find(i => i.id === id);
+  items = items.filter(i => i.id !== id);
+  renderItems();
+  renderDeals();
+  showToast(`🗑️ Removed "${item.name}"`);
+}
+
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('new-name').focus();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-price').value = '';
+}
+
+function closeModalOutside(e) {
+  if (e.target.id === 'modal') closeModal();
+}
+
+function addItem() {
+  const name = document.getElementById('new-name').value.trim();
+  const store = document.getElementById('new-store').value;
+  const price = document.getElementById('new-price').value.trim() || 'N/A';
+  const status = document.getElementById('new-status').value;
+  if (!name) { showToast('⚠️ Please enter an item name'); return; }
+  const newItem = { id: Date.now(), name, store, price, status, notify: true };
+  items.push(newItem);
+  closeModal();
+  renderItems();
+  renderDeals();
+  showToast(`✅ "${name}" added to tracker!`);
+}
+
+// ─── SEARCH ──────────────────────────────────────────────
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const results = groceryDB.filter(g => g.name.toLowerCase().includes(q) || g.store.toLowerCase().includes(q));
+  if (!results.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  searchResults.innerHTML = results.slice(0, 6).map(r => `
+    <div class="search-result-item" onclick="addFromSearch(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+      <div>
+        <div class="result-name">${r.name}</div>
+        <div class="result-meta">📍 ${r.store} · <span style="color:${r.status==='In Stock'?'#16a34a':r.status==='Out of Stock'?'#dc2626':'#d97706'}">${r.status}</span></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="result-price">${r.price}</div>
+        <div class="result-store" style="color:#3b82f6;font-weight:600;">+ Track</div>
+      </div>
+    </div>`).join('');
+});
+
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+document.addEventListener('click', e => { if (!e.target.closest('.search-bar')) searchResults.style.display = 'none'; });
+
+function doSearch() {
+  const q = searchInput.value.trim();
+  if (!q) return;
+  showToast(`🔍 Searching for "${q}"...`);
+  searchResults.style.display = 'none';
+}
+
+function addFromSearch(item) {
+  const existing = items.find(i => i.name === item.name && i.store === item.store);
+  if (existing) { showToast('⚠️ Already tracking this item!'); searchResults.style.display = 'none'; searchInput.value = ''; return; }
+  items.push({ id: Date.now(), ...item, notify: true });
+  searchResults.style.display = 'none';
+  searchInput.value = '';
+  renderItems();
+  renderDeals();
+  switchTab('inventory', document.querySelector('.tab-btn'));
+  showToast(`✅ "${item.name}" added!`);
+}
+
+// ─── AI SUMMARY ──────────────────────────────────────────
+async function doAISummary() {
+  const btn = document.getElementById('ai-btn');
+  const panel = document.getElementById('ai-panel');
+  const textEl = document.getElementById('ai-text');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">◌</span> Summarizing…`;
+  panel.classList.add('visible');
+  textEl.innerHTML = '<span class="typing-cursor"></span>';
+
+  const adSummary = weeklyAds.map(a => `${a.name} (${a.date}): ${a.deals.join(', ')}`).join('\n');
+  const itemList = items.map(i => `${i.name} at ${i.store}`).join(', ');
+  const prompt = `You are a helpful grocery deal assistant. Here are this week's grocery store circulars:\n\n${adSummary}\n\nThe user is tracking these items: ${itemList || 'no items yet'}.\n\nWrite a friendly, concise daily grocery summary (3-5 sentences). Highlight the best deals, mention any matches with tracked items, and give a quick tip. Keep it conversational and useful. Start with "📢 This week's grocery highlights:"`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'Could not generate summary. Please try again.';
+    typeText(textEl, text);
+    showToast('✉️ Summary ready! (Copy to share via iMessage)');
+  } catch(e) {
+    textEl.textContent = 'Could not connect to AI. Please check your connection and try again.';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> AI Summary`;
+}
+
+function typeText(el, text) {
+  el.innerHTML = '';
+  let i = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'typing-cursor';
+  el.appendChild(cursor);
+  const interval = setInterval(() => {
+    if (i < text.length) {
+      el.insertBefore(document.createTextNode(text[i]), cursor);
+      i++;
+    } else {
+      clearInterval(interval);
+      cursor.remove();
+    }
+  }, 12);
+}
+
+// ─── AD VIEW ─────────────────────────────────────────────
+function viewAd(storeName) {
+  const ad = weeklyAds.find(a => a.name === storeName);
+  if (!ad) return;
+  showToast(`🗓️ ${ad.name}: ${ad.deals[0]}, ${ad.deals[1]}...`);
+}
+
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else document.querySelectorAll('.tab-btn')[tab === 'inventory' ? 0 : 1].classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ─── SETTINGS ────────────────────────────────────────────
+function onTimeChange(val) {
+  showToast(`⏰ Daily summary set for ${val}`);
+}
+function onDailyToggle(val) {
+  showToast(val ? '✅ Daily summary enabled' : '⏸️ Daily summary disabled');
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+function showToast(msg) {
+  const container = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 2800);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+renderItems();
+renderAds();
+</script>
+
+</body>
+</html>
